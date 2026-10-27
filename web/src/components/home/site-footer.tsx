@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandIcon } from "@/components/brand-icon";
 import type { T } from "@/lib/i18n";
 import { SECTIONS } from "./sections";
 
@@ -16,7 +17,7 @@ export function SiteFooter({ t, registrationOpen }: { t: T; registrationOpen: bo
       <div className="mx-auto grid w-full max-w-6xl gap-8 px-5 py-8 sm:grid-cols-3">
         <div className="sm:col-span-1">
           <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-2xl bg-brand-fill text-base font-bold text-on-brand">P</span>
+            <BrandIcon size={36} />
             <span className="text-base font-bold">Purels</span>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-[var(--muted)]">{t("home.footer.tagline")}</p>

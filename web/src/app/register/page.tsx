@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BrandIcon } from "@/components/brand-icon";
 import { useT } from "@/components/i18n-provider";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { TurnstileWidget } from "@/components/turnstile-widget";
@@ -60,7 +61,7 @@ export default function RegisterPage() {
   return <main className="relative grid min-h-[100dvh] place-items-center overflow-hidden bg-[var(--canvas)] px-5 py-6">
     <div className="pointer-events-none absolute -left-32 top-1/2 -translate-y-1/2 opacity-20 blur-2xl"><FluidOrb size={480} color="var(--brand)" /></div>
     <section className="panel relative z-10 w-full max-w-md p-6 sm:p-7">
-      <div className="mb-6 flex items-center gap-3"><div className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-fill text-lg font-bold text-on-brand">P</div><div><h1 className="text-xl font-bold tracking-tight">Purels</h1><p className="text-sm text-[var(--muted)]">{t("login.subtitle")}</p></div></div>
+      <div className="mb-6 flex items-center gap-3"><BrandIcon size={44} /><div><h1 className="text-xl font-bold tracking-tight">Purels</h1><p className="text-sm text-[var(--muted)]">{t("login.subtitle")}</p></div></div>
       <h2 className="mb-4 text-lg font-semibold">{t("register.heading")}</h2>
       {captchaError && <p className="console-alert mb-3" role="alert">{captchaError}</p>}
       {registrationClosed ? (

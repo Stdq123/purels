@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type AdminUser } from "@/lib/api-client";
 import { hasMessage } from "@/lib/i18n";
+import { BrandIcon } from "@/components/brand-icon";
 import { getVisibleNavigation, isNavItemActive } from "./admin-navigation";
 import { Icon } from "./icon";
 import { useT } from "./i18n-provider";
@@ -118,7 +119,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         inert={!drawerVisible ? true : undefined}
       >
         <div className="mb-6 flex shrink-0 items-center gap-3 px-2">
-          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-brand-fill text-sm font-bold text-on-brand">P</div>
+          <BrandIcon size={40} />
           <div className="min-w-0">
             <div className="font-semibold tracking-tight text-[var(--ink)]">Purels</div>
             <div className="text-2xs text-[var(--muted)]">{t("shell.console")}</div>
