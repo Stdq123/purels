@@ -140,7 +140,7 @@ export default async function HomePage() {
             <div>
               <h2 className="text-2xl font-bold sm:text-3xl">{t("home.selfHost.title")}</h2>
               <p className="mt-3 text-base text-[var(--muted)]">{t("home.selfHost.body")}</p>
-              <ul className="mt-4 grid gap-2.5">{POINTS.map((point) => <li key={point} className="flex items-start gap-2.5 text-sm"><Icon name="check" size={16} className="mt-0.5 shrink-0 text-[var(--brand)]" />{t(point)}</li>)}</ul>
+              <a className="mt-4 inline-block text-sm font-semibold text-brand-ink hover:underline" href={locale === "zh-CN" ? "https://github.com/puremixai/purels/blob/main/README.zh-CN.md" : "https://github.com/puremixai/purels#quick-start"}>{t("home.selfHost.docs")}</a>
             </div>
             <TerminalCard />
           </div>
@@ -160,7 +160,7 @@ export default async function HomePage() {
 }
 
 function TerminalCard() {
-  return <CodeBlock code={'$ cp .env.example .env\n$ docker compose -f deploy/compose.yaml up -d\n$ curl localhost/readyz\n{"status":"ready"}'} language="bash" filename="quick-start.sh" />;
+  return <CodeBlock code={'git clone https://github.com/puremixai/purels.git\ncd purels\ndocker compose -f deploy/compose.yaml up -d --build'} language="bash" filename="quick-start.sh" />;
 }
 
 function MiniChart() {
@@ -186,4 +186,3 @@ const STEPS = [
   { title: "home.how.share.title", body: "home.how.share.body" },
   { title: "home.how.measure.title", body: "home.how.measure.body" },
 ] as const satisfies readonly { title: MessageKey; body: MessageKey }[];
-const POINTS = ["home.selfHost.point.install", "home.selfHost.point.data", "home.selfHost.point.privacy", "home.selfHost.point.quota"] as const;

@@ -144,8 +144,8 @@ export const en = {
   // feature of the links rather than the subject of the page, so it is described
   // where it belongs and nowhere else.
   "home.title": "Purels | Self-Hosted URL Shortener & Link Analytics",
-  "home.tagline": "Short links, click statistics and a console your team can share, on a server you run.",
-  "home.description": "Create short links, track clicks, and manage access with Purels: an open-source, self-hosted URL shortener with analytics, roles, and audit logs.",
+  "home.tagline": "An open-source, self-hosted URL shortener.",
+  "home.description": "Purels is an open-source, self-hosted URL shortener with custom domains, click analytics, and team management.",
 
   "home.nav.features": "Features",
   "home.nav.how": "How it works",
@@ -156,8 +156,8 @@ export const en = {
   "home.nav.console": "Console",
 
   "home.hero.badge": "Apache-2.0 · self-hosted",
-  "home.hero.title": "Self-hosted short links, with a console built for teams",
-  "home.hero.subhead": "Create short links and follow the clicks they get, with the accounts, roles and audit trail that let more than one person run the console — on a server and database you own.",
+  "home.hero.title": "Self-hosted short links",
+  "home.hero.subhead": "An open-source URL shortener. Use your own domain, track clicks, and manage links with your team.",
   "home.hero.ctaPrimary": "Get started",
   "home.hero.ctaSecondary": "Sign in to the console",
   // The three figures under the hero, read as "1 command to deploy" and so on.
@@ -178,17 +178,17 @@ export const en = {
 
   "home.features.title": "Core features",
   "home.feature.links.title": "Link management",
-  "home.feature.links.body": "Custom aliases or generated codes, with tags, bulk actions and CSV import and export.",
+  "home.feature.links.body": "Create short links with custom aliases, tags, and bulk actions.",
   "home.feature.stats.title": "Click statistics",
-  "home.feature.stats.body": "Trends, referrers, devices and unique visitors, down to the raw record of every click.",
-  "home.feature.rules.title": "Divert rules",
-  "home.feature.rules.body": "Send one short link to different destinations by device or user agent, matched in order.",
-  "home.feature.access.title": "Accounts, roles and audit",
-  "home.feature.access.body": "Multi-user accounts, editable roles with eleven permission scopes, TOTP or OIDC sign-in, and an audit trail for every change.",
-  "home.feature.gallery.title": "A page before the destination",
-  "home.feature.gallery.body": "Each link can open a bilingual gallery of artwork — one piece per visit, a countdown you set, and a pause button — before it sends the visitor on.",
-  "home.feature.privacy.title": "Privacy you control",
-  "home.feature.privacy.body": "Three modes for the visitor address, including storing nothing at all.",
+  "home.feature.stats.body": "See click counts, referrers, devices, and trends over time.",
+  "home.feature.rules.title": "Redirect rules",
+  "home.feature.rules.body": "Send visitors to different destinations based on their device or user agent.",
+  "home.feature.access.title": "Team management",
+  "home.feature.access.body": "Manage users and roles, enable two-factor or single sign-on, and review audit logs.",
+  "home.feature.gallery.title": "Redirect page",
+  "home.feature.gallery.body": "Show the destination and a piece of artwork before redirecting, or go straight there.",
+  "home.feature.privacy.title": "Data and privacy",
+  "home.feature.privacy.body": "Keep data in your own database and choose how visitor IP addresses are recorded.",
 
   // A row of small print under the feature grid. Each one is a real capability.
   // What an operator has to do to use it — point a domain here, turn the checks
@@ -203,42 +203,39 @@ export const en = {
 
   "home.how.title": "How it works",
   "home.how.create.title": "Create",
-  "home.how.create.body": "Paste the long link and pick your own alias, or let Purels generate one.",
+  "home.how.create.body": "Enter a destination and choose an alias or generate one.",
   "home.how.share.title": "Share",
-  "home.how.share.body": "The short link, a QR code, or rules that divert by device and user agent.",
+  "home.how.share.body": "Share the short link or generate a QR code.",
   "home.how.measure.title": "Measure",
-  "home.how.measure.body": "Trends, referrers, devices and unique visitors, all on one dashboard.",
+  "home.how.measure.body": "See how many clicks your link gets and where visitors come from.",
 
-  "home.selfHost.title": "Runs on your own machine",
-  "home.selfHost.body": "Everything Purels needs fits in one Compose file, and nothing it stores leaves your database.",
-  "home.selfHost.point.install": "One docker compose up -d and the API, worker, console and database are running",
-  "home.selfHost.point.data": "Links and click history stay in your own PostgreSQL",
-  "home.selfHost.point.privacy": "Visitor addresses can be dropped entirely, kept as a hash, or hashed with a key you supply",
-  "home.selfHost.point.quota": "Per-account link quotas you configure, with administrators exempt",
+  "home.selfHost.title": "Open source. Self-hosted.",
+  "home.selfHost.body": "Create short links with your own domain. Keep your links and click data on your own server.",
+  "home.selfHost.docs": "Installation guide",
 
   "home.faq.title": "Frequently asked questions",
   // Numbered rather than given semantic slugs: the wording will be revised and a
   // slug that no longer matches its question is worse than no slug at all.
   "home.faq.q1": "Who can create short links?",
-  "home.faq.a1": "Anyone with an account. Each link belongs to the account that created it, and administrators can see every link in the deployment.",
+  "home.faq.a1": "Users with an account can create links. Users manage their own links; administrators can see all links.",
   "home.faq.q2": "Can I use my own domain?",
-  "home.faq.a2": "Yes. Point a domain at this deployment and it serves short links there; the console uses it for display and for the QR codes it generates.",
+  "home.faq.a2": "Yes. Point your domain to the server and configure it in Purels.",
   "home.faq.q3": "What is the gallery on the redirect page?",
-  "home.faq.a3": "An optional interstitial. A link can open a bilingual page showing one artwork from a set of twenty-nine, with a pause button and a countdown you configure, before the visitor continues to the destination. It is on by default at two seconds; zero turns it off.",
+  "home.faq.a3": "An optional page that shows the destination and a piece of artwork. Set how long it appears, or turn it off for a direct redirect.",
   "home.faq.q4": "Where is the visitor data stored?",
-  "home.faq.a4": "In your own PostgreSQL. A visitor's address can be dropped entirely, kept as a plain hash, or hashed with a key you supply: three modes.",
+  "home.faq.a4": "Links and click records are stored in your PostgreSQL database.",
   "home.faq.q5": "Are two-factor authentication and single sign-on supported?",
-  "home.faq.a5": "Both, and both are off until you configure them: TOTP with recovery codes, and OIDC providers. Each needs an encryption key set first.",
+  "home.faq.a5": "Yes. Purels supports TOTP two-factor authentication and OIDC single sign-on. Both require an encryption key.",
   "home.faq.q6": "What happens to existing accounts if registration is closed?",
-  "home.faq.a6": "Nothing. Closing registration only stops new accounts being created; every existing account keeps working.",
+  "home.faq.a6": "Existing accounts can still sign in and use Purels.",
   "home.faq.q7": "What licence is it under?",
   "home.faq.a7": "Apache-2.0.",
 
-  "home.cta.title": "Run it yourself",
-  "home.cta.body": "One docker compose up -d, or sign in and look around the console first.",
+  "home.cta.title": "Get started with Purels",
+  "home.cta.body": "Create short links or deploy Purels on your own server.",
   "home.cta.button": "Get started",
 
-  "home.footer.tagline": "Self-hosted short links, click statistics and a team console, on a server you run.",
+  "home.footer.tagline": "An open-source, self-hosted URL shortener.",
   "home.footer.license": "Apache-2.0",
   "home.footer.copyright": "© 2026 Purels",
 
