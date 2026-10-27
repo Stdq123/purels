@@ -143,9 +143,9 @@ export const en = {
   // unusual about the links themselves, the gallery on the redirect page, is a
   // feature of the links rather than the subject of the page, so it is described
   // where it belongs and nowhere else.
-  "home.title": "Purels: self-hosted URL shortener with an operations console",
+  "home.title": "Purels | Self-Hosted URL Shortener & Link Analytics",
   "home.tagline": "Short links, click statistics and a console your team can share, on a server you run.",
-  "home.description": "Purels is a self-hosted URL shortener with an operations console: create short links, follow the clicks they get, and let a team manage them with editable roles, an audit trail and TOTP or OIDC sign-in.",
+  "home.description": "Create short links, track clicks, and manage access with Purels: an open-source, self-hosted URL shortener with analytics, roles, and audit logs.",
 
   "home.nav.features": "Features",
   "home.nav.how": "How it works",

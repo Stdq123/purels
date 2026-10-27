@@ -32,6 +32,8 @@ export function SiteFooter({ t, registrationOpen }: { t: T; registrationOpen: bo
           ))}
         </ul>
         <ul className="grid content-start gap-2 text-sm text-[var(--muted)]">
+          <li><a href="/i18n/en" hrefLang="en" lang="en">English</a></li>
+          <li><a href="/i18n/zh-CN" hrefLang="zh-CN" lang="zh-CN">中文</a></li>
           <li>
             <Link className="inline-flex min-h-6 items-center hover:text-[var(--ink)]" href="/login">
               {t("home.nav.signIn")}

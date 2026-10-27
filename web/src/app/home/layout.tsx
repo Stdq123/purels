@@ -1,4 +1,7 @@
 import { AdminShell } from "@/components/admin-shell";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 // The trackers are not mounted here: AnalyticsInjector sits in app/layout.tsx
 // so that the landing page, sign-in and registration carry them too. Mounting

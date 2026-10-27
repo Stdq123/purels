@@ -17,11 +17,9 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     rules: {
       userAgent: "*",
       allow: "/",
-      // The console is reachable only with a session and the API is not a
-      // document at all, so neither has anything to offer a crawler. A short
-      // link is answered by the API — a redirect, or a page it marks noindex —
-      // and is not under this app's control anyway.
-      disallow: ["/home", "/admin", "/login", "/register", "/api/"],
+      // HTML pages must remain crawlable for search engines to see noindex.
+      // The API is not a document and does not need to be crawled.
+      disallow: ["/api/"],
     },
     sitemap: `${origin}/sitemap.xml`,
   };

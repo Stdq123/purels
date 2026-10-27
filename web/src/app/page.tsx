@@ -14,11 +14,13 @@ import { tFor } from "@/lib/i18n";
 import { getLocale } from "@/lib/i18n/server";
 import { registrationEnabled } from "@/lib/public-config.server";
 import { hasSession } from "@/lib/session.server";
+import { requestOrigin } from "@/lib/request-origin";
+import { headers } from "next/headers";
 
 /**
  * The one page here that is meant to be read without signing in, and the only
- * one a search engine has any business indexing: the console is Disallowed in
- * robots.txt and a short link is answered by the API, which marks both of its
+ * one a search engine has any business indexing: the console is marked noindex
+ * and a short link is answered by the API, which marks both of its
  * HTML pages noindex.
  *
  * It is a server component for that reason — the metadata has to be in the
@@ -31,23 +33,40 @@ import { hasSession } from "@/lib/session.server";
  * page is the language select in the header; the FAQ opens with `<details>`.
  */
 export async function generateMetadata(): Promise<Metadata> {
-  const t = tFor(await getLocale());
+  const locale = await getLocale();
+  const t = tFor(locale);
+  const title = t("home.title");
+  const description = t("home.description");
+  const landingLocale = (await headers()).get("x-purels-landing-locale");
+  const path = landingLocale === "en" || landingLocale === "zh-CN" ? `/i18n/${landingLocale}` : "/";
   return {
-    title: t("home.title"),
-    description: t("home.description"),
-    alternates: { canonical: "/" },
+    title,
+    description,
+    alternates: { canonical: path, languages: { en: "/i18n/en", "zh-CN": "/i18n/zh-CN", "x-default": "/" } },
+    openGraph: { type: "website", url: path, siteName: "Purels", title, description, locale: locale === "zh-CN" ? "zh_CN" : "en_US" },
+    twitter: { card: "summary", title, description },
   };
 }
 
 export default async function HomePage() {
-  const t = tFor(await getLocale());
+  const locale = await getLocale();
+  const t = tFor(locale);
   // Both reads are server-side for the same reason: the header has to be right
   // in the document the visitor — or the crawler — is served, not corrected
   // afterwards in the browser.
   const [registrationOpen, signedIn] = await Promise.all([registrationEnabled(), hasSession()]);
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Purels",
+    url: `${await requestOrigin()}/`,
+    description: t("home.description"),
+    inLanguage: locale,
+  };
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
       <ScrollProgress />
       <SiteHeader t={t} registrationOpen={registrationOpen} signedIn={signedIn} />
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-brand-fill focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-on-brand">{t("home.skipToMain")}</a>

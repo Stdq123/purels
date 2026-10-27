@@ -24,6 +24,8 @@ import { preferredLocale } from "./negotiate";
  * proxy — but that is the constraint to remember if one is added.
  */
 export async function getLocale(): Promise<Locale> {
+  const landingLocale = (await headers()).get("x-purels-landing-locale");
+  if (isLocale(landingLocale)) return landingLocale;
   const value = (await cookies()).get(LOCALE_COOKIE)?.value;
   if (isLocale(value)) return value;
   return preferredLocale((await headers()).get("accept-language"));

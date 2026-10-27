@@ -25,12 +25,14 @@ export function SiteHeader({ t, registrationOpen, signedIn }: { t: T; registrati
   return (
     <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-surface/90 backdrop-blur-sm">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-4 px-5 sm:gap-6">
-        <Link className="flex shrink-0 items-center gap-2.5" href="/">
+        {/* Reload the root layout so its language follows the landing URL. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a className="flex shrink-0 items-center gap-2.5" href="/">
           <BrandIcon size={36} />
           {/* A span, not a heading: the page gets exactly one h1 and the hero
               has it. */}
           <span className="text-base font-bold">Purels</span>
-        </Link>
+        </a>
         <nav className="hidden items-center gap-6 text-sm text-[var(--muted)] md:flex">
           {SECTIONS.map((section) => (
             <a key={section.id} className="hover:text-[var(--ink)]" href={`#${section.id}`}>

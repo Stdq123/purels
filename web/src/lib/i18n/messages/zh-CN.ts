@@ -123,9 +123,9 @@ export const zhCN: Dictionary = {
   "app.title": "Purels 管理后台",
   "app.description": "Purels 链接管理与运营后台",
 
-  "home.title": "Purels · 自托管短链接服务与运维控制台",
+  "home.title": "Purels | 自托管短链接生成与数据统计平台",
   "home.tagline": "短链接、点击统计，以及一个团队共用的控制台，跑在你自己服务器上。",
-  "home.description": "Purels 是带运维控制台的自托管短链接服务：创建短链、查看点击数据，并通过可编辑角色、审计日志和 TOTP / OIDC 登录把管理交给团队。",
+  "home.description": "Purels 是开源自托管短链接平台，支持短链生成、点击统计、团队权限管理与审计日志，让链接和数据掌握在自己手中。",
 
   "home.nav.features": "功能",
   "home.nav.how": "工作原理",

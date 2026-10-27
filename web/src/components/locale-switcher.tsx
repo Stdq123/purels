@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { usePathname } from "next/navigation";
 import { isLocale, LOCALES, type Locale } from "@/lib/i18n";
 import { setLocale } from "@/lib/i18n/actions";
 import { useLocale, useT } from "./i18n-provider";
@@ -24,6 +25,7 @@ const LOCALE_NAMES: Record<Locale, string> = {
 export function LocaleSwitcher({ className }: { className?: string }) {
   const locale = useLocale();
   const t = useT();
+  const pathname = usePathname();
   const [pending, startTransition] = useTransition();
   // The server is the source of truth; this copy exists only so the select does
   // not snap back to the old language while the action is in flight. React
@@ -44,6 +46,12 @@ export function LocaleSwitcher({ className }: { className?: string }) {
         setSelected(next);
         startTransition(async () => {
           await setLocale(next);
+          if (pathname === "/" || pathname === "/i18n/en" || pathname === "/i18n/zh-CN") {
+            // The root layout carries <html lang> and the i18n provider. A full
+            // navigation ensures both are rendered for the URL's language.
+            // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+            window.location.assign(`/i18n/${next}`);
+          }
         });
       }}
     >
