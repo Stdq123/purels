@@ -114,13 +114,63 @@ decisions that shape it:
 
 ## Quick start
 
-Requires Docker with Compose. Run these commands from the repository root:
+Requires Docker with Compose. The examples below start a local development
+stack with PostgreSQL, Redis, database migrations, the API, worker, console,
+and a Caddy gateway. Choose either prebuilt images or a local build.
+
+> The bundled stack is a **development** stack. It ships a known default
+> password, plain-HTTP cookies and no TLS. Read [Deploying](#deploying) before
+> putting it anywhere reachable.
+
+### Use Docker Hub images
+
+The published images currently support `linux/amd64`. Get the repository at
+the matching release to obtain the Compose configuration and SQL migrations;
+the migrations are not included in the application images:
+
+```sh
+git clone --branch v0.1.0 --depth 1 https://github.com/puremixai/purels.git
+cd purels
+```
+
+Create `deploy/compose.images.yaml` with the matching image tags:
+
+```yaml
+services:
+  api:
+    image: puremixai/purels-api:sha-115e482b6e23c38b593b47b0a69a128c82b91854
+  worker:
+    image: puremixai/purels-api:sha-115e482b6e23c38b593b47b0a69a128c82b91854
+  web:
+    image: puremixai/purels-web:sha-115e482b6e23c38b593b47b0a69a128c82b91854
+```
+
+Pull the images and start without building:
+
+```sh
+docker compose -f deploy/compose.yaml -f deploy/compose.images.yaml pull
+docker compose -f deploy/compose.yaml -f deploy/compose.images.yaml up -d --no-build
+```
+
+Compose runs the migration container before starting the API and worker. For
+another release, use its matching repository revision, migrations, and both
+images. New releases publish the Git version tag as a Docker tag, as well as
+`sha-<full-commit-sha>`. The earlier `v0.1.0` release predates version image
+tags, so the example uses its SHA tag. `latest` can move independently of the
+checkout and may be updated by a tag on an older commit.
+
+### Build locally
+
+For the current source, or for another architecture, build the API/worker and
+Web images on the host:
 
 ```sh
 git clone https://github.com/puremixai/purels.git
 cd purels
 docker compose -f deploy/compose.yaml up -d --build
 ```
+
+### Open and stop the stack
 
 Once `http://localhost/readyz` reports `{"status":"ready"}`, open
 <http://localhost>, then sign in at <http://localhost/login> as `admin` with
@@ -129,14 +179,8 @@ console is at `/home`. Create a link at `/home/links/new`, then open
 `http://localhost/<alias>` to see its destination page or append `+` to preview
 it without recording a click.
 
-> The bundled stack is a **development** stack. It ships a known default
-> password, plain-HTTP cookies and no TLS. Read [Deploying](#deploying) before
-> putting it anywhere reachable.
-
-The stack brings up PostgreSQL, Redis, the migrations, the API, the worker, the
-console and a Caddy gateway. The example values are set in
-[`deploy/compose.yaml`](deploy/compose.yaml); copying `.env.example` to `.env`
-does not change this stack.
+The example values are set in [`deploy/compose.yaml`](deploy/compose.yaml);
+copying `.env.example` to `.env` does not change this stack.
 
 To stop it and keep the data:
 
@@ -144,13 +188,16 @@ To stop it and keep the data:
 docker compose -f deploy/compose.yaml down
 ```
 
-To remove the volumes as well, add `-v`.
+For the image-based stack, include the override file in the `down` command too.
+Adding `-v` removes the PostgreSQL and Redis volumes and their data.
 
 The Docker Hub workflow publishes `puremixai/purels-api` (also used for the
 worker) and `puremixai/purels-web` for `linux/amd64` when a Git tag is pushed.
-Each gets `latest` and `sha-<full-commit-sha>` tags. The tagged commit must
-contain the workflow. Each published tag updates `latest`, including when an
-older commit is tagged.
+New releases each get the Git version tag, `latest`, and
+`sha-<full-commit-sha>`. Git tags must be valid Docker tags, and `latest` and
+names starting with `sha-` are reserved. The tagged commit must contain the
+workflow. Each published tag updates `latest`, including when an older commit
+is tagged.
 The web image is built with `API_PROXY_TARGET=http://api:8080`, matching the
 `api` service in the example Compose stack; set the same value at runtime for
 server-side requests. The Next.js rewrite destination is fixed at build time,

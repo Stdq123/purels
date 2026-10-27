@@ -18,10 +18,19 @@ jobs:
     timeout-minutes: 45
     env:
       BUILDER_NAME: purels-${{ github.run_id }}-${{ github.run_attempt }}
+      RELEASE_TAG: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+
+      - name: Validate image version tag
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,127}$ ]] || \
+             [[ "$RELEASE_TAG" == latest || "$RELEASE_TAG" == sha-* ]]; then
+            echo "Git tag must be a valid Docker tag and cannot be latest or start with sha-." >&2
+            exit 1
+          fi
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v4
@@ -45,12 +54,14 @@ jobs:
             --tag "puremixai/purels-web:sha-${GITHUB_SHA}" \
             --push ./web
 
-      # Update latest only after both commit-specific images exist.
-      - name: Update latest tags
+      # Publish version and latest only after both commit-specific images exist.
+      - name: Publish version and latest tags
         run: |
           docker buildx imagetools create --builder "$BUILDER_NAME" \
+            --tag "puremixai/purels-api:${RELEASE_TAG}" \
             --tag puremixai/purels-api:latest "puremixai/purels-api:sha-${GITHUB_SHA}"
           docker buildx imagetools create --builder "$BUILDER_NAME" \
+            --tag "puremixai/purels-web:${RELEASE_TAG}" \
             --tag puremixai/purels-web:latest "puremixai/purels-web:sha-${GITHUB_SHA}"
 
       # --push exports directly to Docker Hub; it does not load images into the

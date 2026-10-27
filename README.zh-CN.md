@@ -35,7 +35,43 @@ Purels 是可自行部署的短链接服务，提供链接管理、点击统计�
 
 ## 快速启动
 
-需要 Docker 和 Compose。仓库中的 Compose 文件已经包含开发环境所需的数据库、Redis、迁移、API、worker、控制台和 Caddy 网关：
+需要 Docker 和 Compose。仓库中的 Compose 文件包含开发环境所需的 PostgreSQL、Redis、数据库迁移、API、worker、控制台和 Caddy 网关。下面可以选择拉取预构建镜像，或在本地构建镜像。
+
+> **此 Compose 配置仅供本地开发。** 它使用公开的默认密码、HTTP Cookie 和无 TLS 网关；部署到可被他人访问的环境前，请先阅读[部署注意事项](#部署注意事项)。
+
+### 拉取 Docker Hub 镜像
+
+当前发布的镜像支持 `linux/amd64`。先获取对应版本的仓库，以取得 Compose 配置和 SQL 迁移文件；应用镜像本身不包含迁移文件：
+
+```sh
+git clone --branch v0.1.0 --depth 1 https://github.com/puremixai/purels.git
+cd purels
+```
+
+新建 `deploy/compose.images.yaml`，指定与该版本对应的镜像：
+
+```yaml
+services:
+  api:
+    image: puremixai/purels-api:sha-115e482b6e23c38b593b47b0a69a128c82b91854
+  worker:
+    image: puremixai/purels-api:sha-115e482b6e23c38b593b47b0a69a128c82b91854
+  web:
+    image: puremixai/purels-web:sha-115e482b6e23c38b593b47b0a69a128c82b91854
+```
+
+拉取镜像并启动，不在本地构建：
+
+```sh
+docker compose -f deploy/compose.yaml -f deploy/compose.images.yaml pull
+docker compose -f deploy/compose.yaml -f deploy/compose.images.yaml up -d --no-build
+```
+
+Compose 会在 API 和 worker 启动前执行数据库迁移。切换其他版本时，应同时使用该版本对应的仓库代码、迁移文件和两个镜像。新发布的镜像同时提供 Git 版本标签和 `sha-<完整提交号>` 标签；之前发布的 `v0.1.0` 尚无 Docker 版本标签，所以上面的示例使用 SHA 标签。`latest` 可能与当前检出的代码不一致，给较早提交打标签也会更新它。
+
+### 本地构建
+
+需要运行当前源码，或使用其他 CPU 架构时，可在本机直接构建 API/worker 和 Web 镜像：
 
 ```sh
 git clone https://github.com/puremixai/purels.git
@@ -43,11 +79,11 @@ cd purels
 docker compose -f deploy/compose.yaml up -d --build
 ```
 
+### 访问与停止
+
 待 <http://localhost/readyz> 返回 `{"status":"ready"}` 后，打开公共首页 <http://localhost>，或前往 <http://localhost/login>，使用 `admin` / `change-me-now` 登录。登录后的控制台位于 `/home`。
 
 在 `/home/links/new` 创建短链接后，访问 `http://localhost/<alias>` 可查看跳转页，在地址末尾加 `+` 可预览且不计入点击。
-
-> **此 Compose 配置仅供本地开发。** 它使用公开的默认密码、HTTP Cookie 和无 TLS 网关；部署到可被他人访问的环境前，请先阅读[部署注意事项](#部署注意事项)。
 
 停止并保留数据：
 
@@ -55,9 +91,9 @@ docker compose -f deploy/compose.yaml up -d --build
 docker compose -f deploy/compose.yaml down
 ```
 
-确实需要删除 PostgreSQL 和 Redis 卷时，才在 `down` 命令末尾添加 `-v`。
+如果使用远程镜像，执行 `down` 时也应带上覆盖文件。`-v` 会删除 PostgreSQL、Redis 数据卷及其中的数据，只有确实需要清除数据时才添加。
 
-Docker Hub 工作流在推送 Git 标签时，发布 `linux/amd64` 的 `puremixai/purels-api`（也用于 worker）和 `puremixai/purels-web` 镜像，每个镜像都有 `latest` 和 `sha-<完整提交号>` 标签。标签指向的提交必须包含此工作流；每次标签发布都会更新 `latest`，包括给较早的提交打标签。Web 镜像构建时使用 `API_PROXY_TARGET=http://api:8080`，与示例 Compose 的 `api` 服务一致；运行时也需要设置相同的值供服务端请求使用。Next.js 的代理目标在构建时确定，如部署中的 API 使用其他主机名，需要提供 `api` 网络别名，或使用目标地址重新构建 Web 镜像。
+Docker Hub 工作流在推送 Git 标签时，发布 `linux/amd64` 的 `puremixai/purels-api`（也用于 worker）和 `puremixai/purels-web` 镜像。新发布的镜像各有 Git 版本标签、`latest` 和 `sha-<完整提交号>` 标签。Git 标签必须符合 Docker 标签格式，`latest` 和以 `sha-` 开头的名称保留给工作流使用。标签指向的提交必须包含此工作流；每次标签发布都会更新 `latest`，包括给较早的提交打标签。Web 镜像构建时使用 `API_PROXY_TARGET=http://api:8080`，与示例 Compose 的 `api` 服务一致；运行时也需要设置相同的值供服务端请求使用。Next.js 的代理目标在构建时确定，如部署中的 API 使用其他主机名，需要提供 `api` 网络别名，或使用目标地址重新构建 Web 镜像。
 
 ## 配置
 
