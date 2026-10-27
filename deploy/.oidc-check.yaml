@@ -2,7 +2,7 @@
 # identity provider. Not part of the deployment: the shipped default has no
 # provider configured, and password login is the primary path either way.
 #
-#   docker compose -f deploy/compose.yaml -f deploy/.oidc-check.yaml up -d --force-recreate
+#   docker compose -f deploy/compose-dev.yaml -f deploy/.oidc-check.yaml up -d --force-recreate
 #   node scripts/smoke-oidc.mjs
 #
 # --force-recreate matters when this file's Dex configuration changes: Compose

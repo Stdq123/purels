@@ -134,7 +134,7 @@ async function getLink(session, id) {
 // Runs SQL against the compose database. Used for the two things the API has no
 // endpoint for: removing a test account, and filling one to its link cap.
 function psql(sql) {
-  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose.yaml");
+  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose-dev.yaml");
   try {
     execFileSync("docker", ["compose", "-f", compose, "exec", "-T", "postgres", "psql", "-U", "purels", "-d", "purels", "-q", "-c", sql], { stdio: "pipe" });
     return true;

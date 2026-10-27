@@ -160,7 +160,7 @@ export default async function HomePage() {
 }
 
 function TerminalCard() {
-  return <CodeBlock code={'git clone https://github.com/puremixai/purels.git\ncd purels\ndocker compose -f deploy/compose.yaml up -d --build'} language="bash" filename="quick-start.sh" />;
+  return <CodeBlock code={'git clone https://github.com/puremixai/purels.git\ncd purels\ndocker compose -f deploy/compose.yaml up -d'} language="bash" filename="quick-start.sh" />;
 }
 
 function MiniChart() {

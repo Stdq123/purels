@@ -1,7 +1,7 @@
 // Registration CAPTCHA API checks.
 //
 // The default deployment leaves CAPTCHA disabled. Run the enabled branch with:
-//   docker compose -f deploy/compose.yaml -f deploy/.captcha-check.yaml up -d --force-recreate api
+//   docker compose -f deploy/compose-dev.yaml -f deploy/.captcha-check.yaml up -d --force-recreate api
 //   node scripts/smoke-captcha.mjs
 //
 // The test override selects an in-process deterministic verifier and never calls
@@ -60,7 +60,7 @@ async function signIn(s, username = ADMIN_USER, password = ADMIN_PASS) {
   return { response, payload };
 }
 async function psql(sql) {
-  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose.yaml");
+  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose-dev.yaml");
   try {
     execFileSync("docker", ["compose", "-f", compose, "exec", "-T", "postgres", "psql", "-U", "purels", "-d", "purels", "-q", "-c", sql], { stdio: "pipe" });
     return true;

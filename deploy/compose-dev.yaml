@@ -1,0 +1,220 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: purels
+      POSTGRES_PASSWORD: purels
+      POSTGRES_DB: purels
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U purels -d purels"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:8-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "6379:6379"
+
+  migrate:
+    image: migrate/migrate:v4.18.3
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../migrations:/migrations:ro
+    command: ["-path", "/migrations", "-database", "postgres://purels:purels@postgres:5432/purels?sslmode=disable", "up"]
+
+  api:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    environment:
+      API_ADDR: :8080
+      DATABASE_URL: postgres://purels:purels@postgres:5432/purels?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      PUBLIC_URL: http://localhost
+      ADMIN_ORIGIN: http://localhost:3000,http://localhost
+      COOKIE_SECURE: "false"
+      # random keeps codes unguessable; sequential (Base36) makes them enumerable.
+      ALIAS_MODE: random
+      # IANA zone deciding where a statistics "day" starts. Clicks are always
+      # stored as UTC; this only shifts the day boundaries.
+      STATS_TZ: UTC
+      # true reuses the existing short code when a destination is shortened again.
+      UNIQUE_URLS: "true"
+      BOOTSTRAP_USERNAME: admin
+      BOOTSTRAP_PASSWORD: change-me-now
+      # false closes public sign-up without affecting existing accounts.
+      REGISTRATION_ENABLED: "true"
+      # Bot clicks are always recorded; this only decides whether the statistics
+      # report them.
+      COUNT_BOTS: "false"
+      # Keep utm_* and friends intact by appending the visitor's query string to
+      # the destination.
+      FORWARD_QUERY: "true"
+      # Where an unknown short code sends the visitor. Empty means a plain 404.
+      # Must be an absolute http(s) URL; anything else is ignored with a warning.
+      FALLBACK_URL: ""
+      # true hard-deletes links that expired more than PRUNE_GRACE ago. Off by
+      # default because the click history goes with them.
+      AUTO_PRUNE_EXPIRED: "false"
+      PRUNE_GRACE: 720h
+      # How many live links one regular account may own. 0 disables the cap;
+      # administrators are exempt either way.
+      MAX_LINKS_PER_USER: "1000"
+      # Comma-separated host names that may not be shortened, subdomains
+      # included. Empty denies nothing.
+      DESTINATION_DENYLIST: ""
+      # Extra bare host names a link may be filed under, besides the host in
+      # PUBLIC_URL. The scheme always comes from PUBLIC_URL. Empty leaves only
+      # the default. Each host has to resolve to this deployment on its own:
+      # the short code is global, so the domain is display only.
+      SHORT_DOMAINS: ""
+      # What goes into the ip_hash columns: none, anonymised or pseudonymised
+      # (the default). "none" stores nothing, which also hides the unique-visitor
+      # figure; the other two break COUNT(DISTINCT ip_hash) across the switch,
+      # because the same visitor hashes differently before and after.
+      IP_HASH_MODE: pseudonymised
+      # Turns the digest into an HMAC. Setting it is recommended, and the value
+      # must then be kept: generate one with `openssl rand -base64 32`. Empty
+      # keeps the historical plain-SHA-256 digest, which is reversible by brute
+      # force over the IPv4 space, so the API logs a warning at boot when it is
+      # empty and the mode is not "none". Changing or clearing it later breaks
+      # COUNT(DISTINCT ip_hash) across the switch, because the same visitor
+      # hashes differently before and after.
+      IP_HASH_KEY: ""
+      # true makes the server probe link destinations on a schedule. Off by
+      # default: it is outbound traffic that an upgrade should not start on its
+      # own. The manual check button works either way.
+      HEALTH_CHECK_ENABLED: "false"
+      HEALTH_CHECK_INTERVAL: 24h
+      # The built-in second factor's master switch. This value is a first-boot
+      # default only: it seeds the runtime setting on the first boot after the
+      # migration that adds the column, and is not read again. From then on the
+      # switch is a database value an operator changes in the console
+      # (Settings → Registration and sign-in), because turning the second factor
+      # on or off should not need a restart.
+      #
+      # Either way it needs SECRET_ENCRYPTION_KEY below: the secret is stored
+      # encrypted (verifying a code needs the original value), and without a key
+      # enrolment is refused so the deployment cannot accumulate secrets it
+      # cannot read back.
+      TOTP_ENABLED: "false"
+      # How long the half-session between a correct password and a correct code
+      # stays usable.
+      TOTP_CHALLENGE_TTL: 5m
+      # 32 raw bytes, 64 hex characters, or base64 for 32 bytes
+      # (`openssl rand -base64 32`). LOSING OR CHANGING IT INVALIDATES EVERY
+      # STORED SECRET — TOTP enrolment secrets become undecryptable and the only
+      # way back in is an administrator reset from the user list, and OIDC client
+      # secrets have to be pasted in again.
+      SECRET_ENCRYPTION_KEY: ""
+      # Deprecated name for the same key, still read when SECRET_ENCRYPTION_KEY
+      # is empty. Must hold the same value: the ciphertext records nothing about
+      # which name wrote it.
+      # TOTP_ENCRYPTION_KEY: ""
+      # OIDC sign-in providers are configured in the console and stored in the
+      # database; these are the deployment-wide settings. Password login stays
+      # the primary path either way.
+      # Origin the IdP sends the browser back to. Empty means the origin of
+      # PUBLIC_URL. Registered verbatim at the IdP, so it must be the real one
+      # when the console lives on a different domain from the short links.
+      OIDC_REDIRECT_BASE: ""
+      OIDC_REQUEST_TTL: 10m
+      # Permits an http:// issuer, for a self-hosted IdP on a private network.
+      # It widens what oidc:manage can reach; leave it off unless the issuer is
+      # one you control.
+      OIDC_ALLOW_INSECURE_ISSUERS: "false"
+      RATE_LIMIT_ENABLED: "true"
+      RATE_LIMIT_LOGIN: "10"
+      RATE_LIMIT_API: "120"
+      RATE_LIMIT_REDIRECT: "600"
+      RATE_LIMIT_REGISTER: "5"
+      # Guards the second-factor endpoint. Defence in depth only: the real
+      # brute-force bound is the attempt counter stored with the challenge,
+      # because the limiter is fail-open when Redis is unavailable.
+      RATE_LIMIT_2FA: "10"
+      # Guards the sign-in provider list and the OIDC start/callback endpoints.
+      RATE_LIMIT_OIDC: "60"
+    ports:
+      # Loopback only. The gateway is the entry point, and the API trusts the
+      # X-Forwarded-For that Caddy appends — so a caller who can reach this port
+      # directly can name their own address, which hands them a fresh rate-limit
+      # bucket per request and lets them write whatever they like into the audit
+      # log. Published for the smoke scripts on this host, not for the network.
+      - "127.0.0.1:8080:8080"
+
+  worker:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    entrypoint: ["/app/purels-worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://purels:purels@postgres:5432/purels?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      # Must match the API: the worker buckets the days the API queries.
+      STATS_TZ: UTC
+      # Must match the API: the worker is what acts on them.
+      AUTO_PRUNE_EXPIRED: "false"
+      PRUNE_GRACE: 720h
+      HEALTH_CHECK_ENABLED: "false"
+      HEALTH_CHECK_INTERVAL: 24h
+
+  web:
+    build:
+      context: ../web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ""
+        API_PROXY_TARGET: http://api:8080
+    environment:
+      # The same value as the build arg above, but read at runtime: the console's
+      # server components talk to the API directly, because a server render has
+      # no browser origin for the client-side rewrite to resolve against. The
+      # build arg alone leaves this undefined in the standalone server, which is
+      # why the landing page's registration check needs it here too.
+      API_PROXY_TARGET: http://api:8080
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "3000:3000"
+
+  gateway:
+    image: caddy:2.10-alpine
+    depends_on:
+      api:
+        condition: service_started
+      web:
+        condition: service_started
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    ports:
+      - "80:80"
+
+volumes:
+  postgres-data:
+  redis-data:

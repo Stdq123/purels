@@ -64,4 +64,4 @@ migrate-up:
 	migrate -path migrations -database "$${DATABASE_URL}" up
 
 compose-up:
-	docker compose -f deploy/compose.yaml up --build
+	docker compose -f deploy/compose-dev.yaml up --build

@@ -38,9 +38,7 @@ services:
     command: ["-path", "/migrations", "-database", "postgres://purels:purels@postgres:5432/purels?sslmode=disable", "up"]
 
   api:
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    image: puremixai/purels-api:latest
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -163,9 +161,7 @@ services:
       - "127.0.0.1:8080:8080"
 
   worker:
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    image: puremixai/purels-api:latest
     entrypoint: ["/app/purels-worker"]
     depends_on:
       migrate:
@@ -184,18 +180,9 @@ services:
       HEALTH_CHECK_INTERVAL: 24h
 
   web:
-    build:
-      context: ../web
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_BASE_URL: ""
-        API_PROXY_TARGET: http://api:8080
+    image: puremixai/purels-web:latest
     environment:
-      # The same value as the build arg above, but read at runtime: the console's
-      # server components talk to the API directly, because a server render has
-      # no browser origin for the client-side rewrite to resolve against. The
-      # build arg alone leaves this undefined in the standalone server, which is
-      # why the landing page's registration check needs it here too.
+      # The published Web image also uses this API hostname for browser rewrites.
       API_PROXY_TARGET: http://api:8080
     depends_on:
       api:

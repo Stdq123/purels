@@ -96,7 +96,7 @@ jobs:
           node-version: 26.12.1
 
       - name: Build and start the stack
-        run: docker compose -f deploy/compose.yaml up -d --build
+        run: docker compose -f deploy/compose-dev.yaml up -d --build
 
       # The gateway and the console are what the suites talk to, but /readyz is
       # the API's own answer, and it only turns green once the database is
@@ -111,7 +111,7 @@ jobs:
             sleep 2
           done
           echo "The API never became ready."
-          docker compose -f deploy/compose.yaml logs --tail=100
+          docker compose -f deploy/compose-dev.yaml logs --tail=100
           exit 1
 
       # smoke-pages.mjs drives a browser over the DevTools protocol, so Chrome
@@ -148,8 +148,8 @@ jobs:
 
       - name: Stack logs
         if: failure()
-        run: docker compose -f deploy/compose.yaml logs --tail=200
+        run: docker compose -f deploy/compose-dev.yaml logs --tail=200
 
       - name: Stop the stack
         if: always()
-        run: docker compose -f deploy/compose.yaml down -v
+        run: docker compose -f deploy/compose-dev.yaml down -v

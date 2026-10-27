@@ -124,40 +124,23 @@ and a Caddy gateway. Choose either prebuilt images or a local build.
 
 ### Use Docker Hub images
 
-The published images currently support `linux/amd64`. Get the repository at
-the matching release to obtain the Compose configuration and SQL migrations;
-the migrations are not included in the application images:
+The published images currently support `linux/amd64`. Clone the repository to
+obtain the Compose configuration and SQL migrations; the migrations are not
+included in the application images:
 
 ```sh
-git clone --branch v0.1.0 --depth 1 https://github.com/puremixai/purels.git
+git clone https://github.com/puremixai/purels.git
 cd purels
+docker compose -f deploy/compose.yaml pull
+docker compose -f deploy/compose.yaml up -d
 ```
 
-Create `deploy/compose.images.yaml` with the matching image tags:
-
-```yaml
-services:
-  api:
-    image: puremixai/purels-api:sha-115e482b6e23c38b593b47b0a69a128c82b91854
-  worker:
-    image: puremixai/purels-api:sha-115e482b6e23c38b593b47b0a69a128c82b91854
-  web:
-    image: puremixai/purels-web:sha-115e482b6e23c38b593b47b0a69a128c82b91854
-```
-
-Pull the images and start without building:
-
-```sh
-docker compose -f deploy/compose.yaml -f deploy/compose.images.yaml pull
-docker compose -f deploy/compose.yaml -f deploy/compose.images.yaml up -d --no-build
-```
-
-Compose runs the migration container before starting the API and worker. For
-another release, use its matching repository revision, migrations, and both
-images. New releases publish the Git version tag as a Docker tag, as well as
-`sha-<full-commit-sha>`. The earlier `v0.1.0` release predates version image
-tags, so the example uses its SHA tag. `latest` can move independently of the
-checkout and may be updated by a tag on an older commit.
+`deploy/compose.yaml` pulls `puremixai/purels-api:latest` for the API and
+worker and `puremixai/purels-web:latest` for the console. Compose runs the
+migration container before starting the API and worker. `latest` can move
+independently of the repository checkout; before deploying or upgrading, make
+sure the checkout's migrations match the image release. Back up PostgreSQL
+before running migrations.
 
 ### Build locally
 
@@ -167,7 +150,7 @@ Web images on the host:
 ```sh
 git clone https://github.com/puremixai/purels.git
 cd purels
-docker compose -f deploy/compose.yaml up -d --build
+docker compose -f deploy/compose-dev.yaml up -d --build
 ```
 
 ### Open and stop the stack
@@ -188,7 +171,7 @@ To stop it and keep the data:
 docker compose -f deploy/compose.yaml down
 ```
 
-For the image-based stack, include the override file in the `down` command too.
+For a locally built stack, use `deploy/compose-dev.yaml` in the `down` command.
 Adding `-v` removes the PostgreSQL and Redis volumes and their data.
 
 The Docker Hub workflow publishes `puremixai/purels-api` (also used for the
@@ -198,6 +181,10 @@ New releases each get the Git version tag, `latest`, and
 names starting with `sha-` are reserved. The tagged commit must contain the
 workflow. Each published tag updates `latest`, including when an older commit
 is tagged.
+The workflow also updates the Docker Hub descriptions from
+[`docs/docker-hub-api.md`](docs/docker-hub-api.md) and
+[`docs/docker-hub-web.md`](docs/docker-hub-web.md); the configured Docker Hub
+token must have permission to update the repositories.
 The web image is built with `API_PROXY_TARGET=http://api:8080`, matching the
 `api` service in the example Compose stack; set the same value at runtime for
 server-side requests. The Next.js rewrite destination is fixed at build time,

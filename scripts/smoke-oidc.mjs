@@ -21,7 +21,7 @@
 // The second half drives a real sign-in against a real identity provider, and
 // is skipped unless one is reachable:
 //
-//   docker compose -f deploy/compose.yaml -f deploy/.oidc-check.yaml up -d --force-recreate
+//   docker compose -f deploy/compose-dev.yaml -f deploy/.oidc-check.yaml up -d --force-recreate
 //   node scripts/smoke-oidc.mjs
 //
 // That override starts Dex on :5556 with two static users. It also has to be
@@ -136,7 +136,7 @@ async function signIn(session, username, password) {
 // One helper rather than three: the sweeps below all need the same invocation,
 // and -t -A is what makes a count readable as a bare number.
 function psql(sql) {
-  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose.yaml");
+  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose-dev.yaml");
   try {
     return execFileSync(
       "docker",
@@ -751,7 +751,7 @@ async function main() {
   console.log(`insecure issuers allowed: ${insecureAllowed ? "yes" : "no"}`);
   if (skipped) {
     console.log("Start the test provider to run the sign-in checks:");
-    console.log("  docker compose -f deploy/compose.yaml -f deploy/.oidc-check.yaml up -d --force-recreate");
+    console.log("  docker compose -f deploy/compose-dev.yaml -f deploy/.oidc-check.yaml up -d --force-recreate");
   }
   process.exit(failed ? 1 : 0);
 }

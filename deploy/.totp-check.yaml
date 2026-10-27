@@ -1,7 +1,7 @@
 # Temporary override used to verify the TOTP path with the feature switched on.
 # Not part of the deployment: the shipped default is TOTP_ENABLED=false.
 #
-#   docker compose -f deploy/compose.yaml -f deploy/.totp-check.yaml up -d api
+#   docker compose -f deploy/compose-dev.yaml -f deploy/.totp-check.yaml up -d api
 #   node scripts/smoke-totp.mjs
 #
 # RATE_LIMIT_2FA is raised because a full run makes about a dozen verify calls

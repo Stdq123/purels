@@ -64,6 +64,24 @@ jobs:
             --tag "puremixai/purels-web:${RELEASE_TAG}" \
             --tag puremixai/purels-web:latest "puremixai/purels-web:sha-${GITHUB_SHA}"
 
+      - name: Update API image description
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
+        with:
+          username: puremixai
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          repository: puremixai/purels-api
+          short-description: API and worker for Purels, a self-hosted URL shortener with link analytics.
+          readme-filepath: ./docs/docker-hub-api.md
+
+      - name: Update Web image description
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0
+        with:
+          username: puremixai
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+          repository: puremixai/purels-web
+          short-description: Web console for Purels, a self-hosted URL shortener with link analytics.
+          readme-filepath: ./docs/docker-hub-web.md
+
       # --push exports directly to Docker Hub; it does not load images into the
       # runner's image store. Removing this builder also removes its BuildKit
       # container and cache volume, including when a build fails or is cancelled.

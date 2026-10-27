@@ -122,7 +122,7 @@ async function register(session, username, password, ip = REG_IP, captchaToken =
 // with psql. Their links, sessions and tokens follow through ON DELETE CASCADE.
 function purgeAccounts(usernames) {
   if (!usernames.every((name) => /^[a-z0-9_-]+$/.test(name))) return false;
-  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose.yaml");
+  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose-dev.yaml");
   const sql = `DELETE FROM admin_users WHERE username IN (${usernames.map((name) => `'${name}'`).join(",")});`;
   try {
     execFileSync("docker", ["compose", "-f", compose, "exec", "-T", "postgres", "psql", "-U", "purels", "-d", "purels", "-q", "-c", sql], { stdio: "pipe" });

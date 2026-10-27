@@ -201,7 +201,7 @@ async function register(session, username, password, captchaToken = CAPTCHA_TOKE
 // psql. Its challenges and recovery codes follow by ON DELETE CASCADE.
 function purgeAccount(username) {
   if (!/^[a-z0-9_-]+$/.test(username)) return false;
-  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose.yaml");
+  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose-dev.yaml");
   const sql = `DELETE FROM admin_users WHERE username = '${username}';`;
   try {
     execFileSync("docker", ["compose", "-f", compose, "exec", "-T", "postgres", "psql", "-U", "purels", "-d", "purels", "-q", "-c", sql], { stdio: "pipe" });

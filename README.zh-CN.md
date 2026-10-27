@@ -41,33 +41,16 @@ Purels 是可自行部署的短链接服务，提供链接管理、点击统计�
 
 ### 拉取 Docker Hub 镜像
 
-当前发布的镜像支持 `linux/amd64`。先获取对应版本的仓库，以取得 Compose 配置和 SQL 迁移文件；应用镜像本身不包含迁移文件：
+当前发布的镜像支持 `linux/amd64`。先获取仓库，以取得 Compose 配置和 SQL 迁移文件；应用镜像本身不包含迁移文件：
 
 ```sh
-git clone --branch v0.1.0 --depth 1 https://github.com/puremixai/purels.git
+git clone https://github.com/puremixai/purels.git
 cd purels
+docker compose -f deploy/compose.yaml pull
+docker compose -f deploy/compose.yaml up -d
 ```
 
-新建 `deploy/compose.images.yaml`，指定与该版本对应的镜像：
-
-```yaml
-services:
-  api:
-    image: puremixai/purels-api:sha-115e482b6e23c38b593b47b0a69a128c82b91854
-  worker:
-    image: puremixai/purels-api:sha-115e482b6e23c38b593b47b0a69a128c82b91854
-  web:
-    image: puremixai/purels-web:sha-115e482b6e23c38b593b47b0a69a128c82b91854
-```
-
-拉取镜像并启动，不在本地构建：
-
-```sh
-docker compose -f deploy/compose.yaml -f deploy/compose.images.yaml pull
-docker compose -f deploy/compose.yaml -f deploy/compose.images.yaml up -d --no-build
-```
-
-Compose 会在 API 和 worker 启动前执行数据库迁移。切换其他版本时，应同时使用该版本对应的仓库代码、迁移文件和两个镜像。新发布的镜像同时提供 Git 版本标签和 `sha-<完整提交号>` 标签；之前发布的 `v0.1.0` 尚无 Docker 版本标签，所以上面的示例使用 SHA 标签。`latest` 可能与当前检出的代码不一致，给较早提交打标签也会更新它。
+`deploy/compose.yaml` 使用 `puremixai/purels-api:latest` 运行 API 和 worker，使用 `puremixai/purels-web:latest` 运行控制台。Compose 会在 API 和 worker 启动前执行数据库迁移。`latest` 可能独立于仓库代码更新；部署或升级前，应确认检出的迁移文件与镜像版本匹配，并在执行迁移前备份 PostgreSQL。
 
 ### 本地构建
 
@@ -76,7 +59,7 @@ Compose 会在 API 和 worker 启动前执行数据库迁移。切换其他版�
 ```sh
 git clone https://github.com/puremixai/purels.git
 cd purels
-docker compose -f deploy/compose.yaml up -d --build
+docker compose -f deploy/compose-dev.yaml up -d --build
 ```
 
 ### 访问与停止
@@ -91,9 +74,11 @@ docker compose -f deploy/compose.yaml up -d --build
 docker compose -f deploy/compose.yaml down
 ```
 
-如果使用远程镜像，执行 `down` 时也应带上覆盖文件。`-v` 会删除 PostgreSQL、Redis 数据卷及其中的数据，只有确实需要清除数据时才添加。
+如果使用本地构建，执行 `down` 时应使用 `deploy/compose-dev.yaml`。`-v` 会删除 PostgreSQL、Redis 数据卷及其中的数据，只有确实需要清除数据时才添加。
 
 Docker Hub 工作流在推送 Git 标签时，发布 `linux/amd64` 的 `puremixai/purels-api`（也用于 worker）和 `puremixai/purels-web` 镜像。新发布的镜像各有 Git 版本标签、`latest` 和 `sha-<完整提交号>` 标签。Git 标签必须符合 Docker 标签格式，`latest` 和以 `sha-` 开头的名称保留给工作流使用。标签指向的提交必须包含此工作流；每次标签发布都会更新 `latest`，包括给较早的提交打标签。Web 镜像构建时使用 `API_PROXY_TARGET=http://api:8080`，与示例 Compose 的 `api` 服务一致；运行时也需要设置相同的值供服务端请求使用。Next.js 的代理目标在构建时确定，如部署中的 API 使用其他主机名，需要提供 `api` 网络别名，或使用目标地址重新构建 Web 镜像。
+
+工作流还会分别从 [`docs/docker-hub-api.md`](docs/docker-hub-api.md) 和 [`docs/docker-hub-web.md`](docs/docker-hub-web.md) 同步 Docker Hub 仓库介绍；配置的 Docker Hub token 需要有更新仓库信息的权限。
 
 ## 配置
 

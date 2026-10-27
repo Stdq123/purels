@@ -16,7 +16,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 const BASE = (process.env.API_BASE || "http://localhost:8080").replace(/\/$/, "");
 const USER = process.env.ADMIN_USER || "admin";
 const PASS = process.env.ADMIN_PASS || "change-me-now";
-const COMPOSE = ["-f", "deploy/compose.yaml"];
+const COMPOSE = ["-f", "deploy/compose-dev.yaml"];
 
 // 23:30Z on the 17th: the 17th in UTC, already the 18th in Asia/Shanghai.
 const OCCURRED_AT = "2026-09-17 23:30:00+00";

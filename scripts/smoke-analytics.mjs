@@ -93,7 +93,7 @@ async function json(response) {
 // setting one, so the row goes back to empty through psql and the audit entries
 // this run wrote go with it.
 function psql(sql) {
-  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose.yaml");
+  const compose = resolve(dirname(fileURLToPath(import.meta.url)), "..", "deploy", "compose-dev.yaml");
   try {
     return execFileSync(
       "docker",
