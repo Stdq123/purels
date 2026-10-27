@@ -41,7 +41,7 @@ Purels 是可自行部署的短链接服务，提供链接管理、点击统计�
 
 ### 拉取 Docker Hub 镜像
 
-当前发布的镜像支持 `linux/amd64`。先获取仓库，以取得 Compose 配置和 SQL 迁移文件；应用镜像本身不包含迁移文件：
+发布的镜像支持 `linux/amd64` 和 `linux/arm64`。先获取仓库，以取得 Compose 配置和 SQL 迁移文件；应用镜像本身不包含迁移文件：
 
 ```sh
 git clone https://github.com/puremixai/purels.git
@@ -76,7 +76,7 @@ docker compose -f deploy/compose.yaml down
 
 如果使用本地构建，执行 `down` 时应使用 `deploy/compose-dev.yaml`。`-v` 会删除 PostgreSQL、Redis 数据卷及其中的数据，只有确实需要清除数据时才添加。
 
-Docker Hub 工作流在推送 Git 标签时，发布 `linux/amd64` 的 `puremixai/purels-api`（也用于 worker）和 `puremixai/purels-web` 镜像。新发布的镜像各有 Git 版本标签、`latest` 和 `sha-<完整提交号>` 标签。Git 标签必须符合 Docker 标签格式，`latest` 和以 `sha-` 开头的名称保留给工作流使用。标签指向的提交必须包含此工作流；每次标签发布都会更新 `latest`，包括给较早的提交打标签。Web 镜像构建时使用 `API_PROXY_TARGET=http://api:8080`，与示例 Compose 的 `api` 服务一致；运行时也需要设置相同的值供服务端请求使用。Next.js 的代理目标在构建时确定，如部署中的 API 使用其他主机名，需要提供 `api` 网络别名，或使用目标地址重新构建 Web 镜像。
+Docker Hub 工作流在推送 Git 标签时，发布支持 `linux/amd64` 和 `linux/arm64` 的 `puremixai/purels-api`（也用于 worker）和 `puremixai/purels-web` 镜像。新发布的镜像各有 Git 版本标签、`latest` 和 `sha-<完整提交号>` 标签。Git 标签必须符合 Docker 标签格式，`latest` 和以 `sha-` 开头的名称保留给工作流使用。标签指向的提交必须包含此工作流；每次标签发布都会更新 `latest`，包括给较早的提交打标签。Web 镜像构建时使用 `API_PROXY_TARGET=http://api:8080`，与示例 Compose 的 `api` 服务一致；运行时也需要设置相同的值供服务端请求使用。Next.js 的代理目标在构建时确定，如部署中的 API 使用其他主机名，需要提供 `api` 网络别名，或使用目标地址重新构建 Web 镜像。
 
 工作流还会分别从 [`docs/docker-hub-api.md`](docs/docker-hub-api.md) 和 [`docs/docker-hub-web.md`](docs/docker-hub-web.md) 同步 Docker Hub 仓库介绍；配置的 Docker Hub token 需要有更新仓库信息的权限。
 

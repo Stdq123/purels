@@ -124,7 +124,7 @@ and a Caddy gateway. Choose either prebuilt images or a local build.
 
 ### Use Docker Hub images
 
-The published images currently support `linux/amd64`. Clone the repository to
+Published images support `linux/amd64` and `linux/arm64`. Clone the repository to
 obtain the Compose configuration and SQL migrations; the migrations are not
 included in the application images:
 
@@ -175,7 +175,7 @@ For a locally built stack, use `deploy/compose-dev.yaml` in the `down` command.
 Adding `-v` removes the PostgreSQL and Redis volumes and their data.
 
 The Docker Hub workflow publishes `puremixai/purels-api` (also used for the
-worker) and `puremixai/purels-web` for `linux/amd64` when a Git tag is pushed.
+worker) and `puremixai/purels-web` for `linux/amd64` and `linux/arm64` when a Git tag is pushed.
 New releases each get the Git version tag, `latest`, and
 `sha-<full-commit-sha>`. Git tags must be valid Docker tags, and `latest` and
 names starting with `sha-` are reserved. The tagged commit must contain the

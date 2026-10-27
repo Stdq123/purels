@@ -38,18 +38,23 @@ jobs:
           username: puremixai
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
+      - name: Set up CPU emulation
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: arm64
+
       - name: Create an isolated builder
         run: docker buildx create --name "$BUILDER_NAME" --driver docker-container --bootstrap
 
       - name: Build and push API and worker image
         run: |
-          docker buildx build --builder "$BUILDER_NAME" --platform linux/amd64 \
+          docker buildx build --builder "$BUILDER_NAME" --platform linux/amd64,linux/arm64 \
             --tag "puremixai/purels-api:sha-${GITHUB_SHA}" \
             --push .
 
       - name: Build and push web image
         run: |
-          docker buildx build --builder "$BUILDER_NAME" --platform linux/amd64 \
+          docker buildx build --builder "$BUILDER_NAME" --platform linux/amd64,linux/arm64 \
             --build-arg API_PROXY_TARGET=http://api:8080 \
             --tag "puremixai/purels-web:sha-${GITHUB_SHA}" \
             --push ./web

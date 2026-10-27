@@ -24,7 +24,7 @@ in the documentation.
 
 Releases publish `latest`, a Git version tag, and `sha-<full-commit-sha>`.
 The earlier `v0.1.0` release has no version image tag; use its SHA tag. Images are
-currently built for `linux/amd64`.
+currently built for `linux/amd64` and `linux/arm64`.
 
 [Source and documentation](https://github.com/puremixai/purels) ·
 [中文文档](https://github.com/puremixai/purels/blob/main/README.zh-CN.md) ·
