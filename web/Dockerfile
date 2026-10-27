@@ -1,9 +1,9 @@
-FROM node:24-alpine AS deps
+FROM node:26.12.1-alpine3.24 AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
-FROM node:24-alpine AS build
+FROM node:26.12.1-alpine3.24 AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -13,7 +13,7 @@ ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV API_PROXY_TARGET=$API_PROXY_TARGET
 RUN npm run build
 
-FROM node:24-alpine AS runner
+FROM node:26.12.1-alpine3.24 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/.next/standalone ./

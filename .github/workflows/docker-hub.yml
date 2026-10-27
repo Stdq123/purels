@@ -1,0 +1,64 @@
+name: Publish Docker images
+
+on:
+  push:
+    tags: ['**']
+
+permissions:
+  contents: read
+
+# Do not interrupt a push halfway through or let two runs update latest at once.
+concurrency:
+  group: docker-hub-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      BUILDER_NAME: purels-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: puremixai
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: Create an isolated builder
+        run: docker buildx create --name "$BUILDER_NAME" --driver docker-container --bootstrap
+
+      - name: Build and push API and worker image
+        run: |
+          docker buildx build --builder "$BUILDER_NAME" --platform linux/amd64 \
+            --tag "puremixai/purels-api:sha-${GITHUB_SHA}" \
+            --push .
+
+      - name: Build and push web image
+        run: |
+          docker buildx build --builder "$BUILDER_NAME" --platform linux/amd64 \
+            --build-arg API_PROXY_TARGET=http://api:8080 \
+            --tag "puremixai/purels-web:sha-${GITHUB_SHA}" \
+            --push ./web
+
+      # Update latest only after both commit-specific images exist.
+      - name: Update latest tags
+        run: |
+          docker buildx imagetools create --builder "$BUILDER_NAME" \
+            --tag puremixai/purels-api:latest "puremixai/purels-api:sha-${GITHUB_SHA}"
+          docker buildx imagetools create --builder "$BUILDER_NAME" \
+            --tag puremixai/purels-web:latest "puremixai/purels-web:sha-${GITHUB_SHA}"
+
+      # --push exports directly to Docker Hub; it does not load images into the
+      # runner's image store. Removing this builder also removes its BuildKit
+      # container and cache volume, including when a build fails or is cancelled.
+      - name: Remove build resources
+        if: always()
+        run: |
+          if docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
+            docker buildx rm --force "$BUILDER_NAME"
+          fi

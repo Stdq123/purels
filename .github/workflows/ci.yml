@@ -58,7 +58,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 26.12.1
           cache: npm
           cache-dependency-path: web/package-lock.json
 
@@ -93,7 +93,7 @@ jobs:
       # it does need a Node the runner image does not guarantee.
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 26.12.1
 
       - name: Build and start the stack
         run: docker compose -f deploy/compose.yaml up -d --build

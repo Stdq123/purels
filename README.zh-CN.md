@@ -57,6 +57,8 @@ docker compose -f deploy/compose.yaml down
 
 确实需要删除 PostgreSQL 和 Redis 卷时，才在 `down` 命令末尾添加 `-v`。
 
+Docker Hub 工作流在推送 Git 标签时，发布 `linux/amd64` 的 `puremixai/purels-api`（也用于 worker）和 `puremixai/purels-web` 镜像，每个镜像都有 `latest` 和 `sha-<完整提交号>` 标签。标签指向的提交必须包含此工作流；每次标签发布都会更新 `latest`，包括给较早的提交打标签。Web 镜像构建时使用 `API_PROXY_TARGET=http://api:8080`，与示例 Compose 的 `api` 服务一致；运行时也需要设置相同的值供服务端请求使用。Next.js 的代理目标在构建时确定，如部署中的 API 使用其他主机名，需要提供 `api` 网络别名，或使用目标地址重新构建 Web 镜像。
+
 ## 配置
 
 [`.env.example`](.env.example) 列出直接运行 API/worker 时可用的环境变量。Compose 的开发值直接写在 [`deploy/compose.yaml`](deploy/compose.yaml) 中；复制或修改 `.env` 不会更改这个示例栈。主要配置如下：
@@ -137,7 +139,7 @@ API 与 worker 使用同一镜像的不同入口。统计日计算依赖两者�
 
 ## 开发
 
-本地开发需要 Go 1.27、Node.js 24、Docker 和 Compose。先启动 PostgreSQL、Redis，再执行迁移：
+本地开发需要 Go 1.27.3、Node.js 26、Docker 和 Compose。先启动 PostgreSQL、Redis，再执行迁移：
 
 ```sh
 docker compose -f deploy/compose.yaml up -d postgres redis

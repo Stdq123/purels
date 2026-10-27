@@ -146,6 +146,17 @@ docker compose -f deploy/compose.yaml down
 
 To remove the volumes as well, add `-v`.
 
+The Docker Hub workflow publishes `puremixai/purels-api` (also used for the
+worker) and `puremixai/purels-web` for `linux/amd64` when a Git tag is pushed.
+Each gets `latest` and `sha-<full-commit-sha>` tags. The tagged commit must
+contain the workflow. Each published tag updates `latest`, including when an
+older commit is tagged.
+The web image is built with `API_PROXY_TARGET=http://api:8080`, matching the
+`api` service in the example Compose stack; set the same value at runtime for
+server-side requests. The Next.js rewrite destination is fixed at build time,
+so a deployment with a different API hostname must provide an `api` network
+alias or rebuild the web image with the intended build argument.
+
 ## Configuration
 
 Infrastructure and secret settings remain environment variables. Use
@@ -340,7 +351,7 @@ depends on `store` and `domain`, and `domain` depends on nothing.
 
 ## Development
 
-Requires Go 1.27, Node 24 and Docker with Compose. Start PostgreSQL and Redis,
+Requires Go 1.27.3, Node 26 and Docker with Compose. Start PostgreSQL and Redis,
 then apply the migrations before starting the API:
 
 ```sh

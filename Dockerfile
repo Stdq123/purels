@@ -1,4 +1,4 @@
-FROM golang:1.27-alpine AS build
+FROM golang:1.27.3-alpine3.24 AS build
 WORKDIR /src
 COPY go.mod go.sum* ./
 RUN go mod download
@@ -6,7 +6,7 @@ COPY . .
 RUN CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/purels-api ./cmd/purels-api && \
     CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /out/purels-worker ./cmd/purels-worker
 
-FROM alpine:3.22
+FROM alpine:3.24.3
 RUN adduser -D -H -u 10001 purels
 COPY --from=build /out/purels-api /app/purels-api
 COPY --from=build /out/purels-worker /app/purels-worker

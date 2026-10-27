@@ -314,7 +314,7 @@ async function main() {
   const redirectDeleted = await call(`/api${STAMP}doomed`);
   record("redirect does not resolve a deleted link", redirectDeleted.status === 404, `status=${redirectDeleted.status}`);
 
-  // ---------- case-insensitive aliases ----------
+  // ---------- case-sensitive aliases ----------
   const mixedAlias = `Api${STAMP}Case`;
   const mixedCreate = await json(
     await call("/api/v1/links", {
@@ -329,17 +329,30 @@ async function main() {
       },
     }),
   );
-  record("an alias is stored lower-cased", mixedCreate.link?.alias === mixedAlias.toLowerCase(), `alias=${mixedCreate.link?.alias}`);
+  record("an alias preserves its case", mixedCreate.link?.alias === mixedAlias, `alias=${mixedCreate.link?.alias}`);
+
+  const mixedLookup = await call(`/${mixedAlias}`);
+  record("a short code resolves with its exact casing", mixedLookup.status === 302, `status=${mixedLookup.status}`);
 
   const upperLookup = await call(`/${mixedAlias.toUpperCase()}`);
-  record("a short code resolves in any casing", upperLookup.status === 302, `status=${upperLookup.status}`);
+  record("a different casing does not resolve the original code", upperLookup.status === 404, `status=${upperLookup.status}`);
 
   const upperDupe = await call("/api/v1/links", {
     method: "POST",
     headers: { "X-CSRF-Token": csrf },
-    body: { destination_url: `https://example.org/case-${STAMP}-2`, alias: mixedAlias.toUpperCase() },
+    body: { destination_url: `https://example.org/case-${STAMP}-2`, alias: mixedAlias.toUpperCase(), interstitial_seconds: 0 },
   });
-  record("a differing case is the same alias", upperDupe.status === 409, `status=${upperDupe.status}`);
+  record("a differing case can be a separate alias", upperDupe.status === 201, `status=${upperDupe.status}`);
+
+  const upperRedirect = await call(`/${mixedAlias.toUpperCase()}`);
+  record("the separate alias resolves to its own destination", upperRedirect.status === 302 && upperRedirect.headers.get("location") === `https://example.org/case-${STAMP}-2`, `status=${upperRedirect.status} location=${upperRedirect.headers.get("location")}`);
+
+  const exactDupe = await call("/api/v1/links", {
+    method: "POST",
+    headers: { "X-CSRF-Token": csrf },
+    body: { destination_url: `https://example.org/case-${STAMP}-3`, alias: mixedAlias },
+  });
+  record("an exact duplicate alias is rejected", exactDupe.status === 409, `status=${exactDupe.status}`);
 
   // ---------- query string forwarding ----------
   const forwarded = await call(`/${taggedAlias}?utm_source=news&x=1`);
